@@ -9,6 +9,8 @@ let pauzirano = false;
 let score = 0;
 let stitiTajmer = 0;
 
+let nickname = "Igrac";
+
 let tema = "SVIJETLA";
 
 const temaBtn = document.getElementById("temaBtn");
@@ -201,6 +203,11 @@ function crtaj(){
     }
     ctx.fillStyle = igrac.boja;
     nacrtajKrug(igrac.x, igrac.y, igrac.r);
+    ctx.font = "14px Arial";
+    ctx.fillStyle = "#2e579a";
+    ctx.textAlign = "center";
+    ctx.fillText(nickname, igrac.x, igrac.y - igrac.r - 8);
+    ctx.textAlign = "start";
     ctx.fillStyle = "black";
     ctx.font = "12px Audiowide";
     ctx.fillText("VELICINA: " + igrac.r, 10, 20);
