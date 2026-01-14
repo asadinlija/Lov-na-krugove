@@ -9,17 +9,27 @@ let pauzirano = false;
 let score = 0;
 let stitiTajmer = 0;
 
+// dodatna funkcionalnost timer prezivljavanja
+let vrijemePocetka = 0;
+let ukupnoPauziranoVrijeme = 0;
+let pocetakPauze = 0;
+let vrijemeKraja = 0;
+
+
+// dodatna funkcionalnost nickname i izbor boje
 let nickname = "Igrac";
 
 let tema = "SVIJETLA";
 
 const temaBtn = document.getElementById("temaBtn");
+temaBtn.textContent = (tema == "SVIJETLA") ? "TAMNA" : "SVIJETLA";
 temaBtn.addEventListener("click", () => {
   tema = (tema == "SVIJETLA") ? "TAMNA" : "SVIJETLA";
   temaBtn.textContent = (tema == "SVIJETLA") ? "TAMNA" : "SVIJETLA";
   primijeniTemu();
 });
 
+// dodatna funkcionalnost za dark/light temu
 function primijeniTemu(){
   if(tema === "TAMNA"){
     document.body.style.backgroundColor = "#0E213F";
@@ -175,6 +185,7 @@ function updateuj(){
         krugovi.push(napraviKrug());
       }else{
           gameOver = true;
+          vrijemeKraja = performance.now();
         }
       }
     }
@@ -213,7 +224,20 @@ function crtaj(){
     ctx.fillText("VELICINA: " + igrac.r, 10, 20);
     ctx.font = "12px Audiowide";
     ctx.fillText("SCORE: " + score, 10, 40);
-
+    
+    let sada = gameOver ? vrijemeKraja : performance.now();
+    let proteklo = 0;
+    if(igraPocela){
+      if(pauzirano){
+        proteklo = pocetakPauze - vrijemePocetka - ukupnoPauziranoVrijeme;
+      }else{
+        proteklo = sada - vrijemePocetka - ukupnoPauziranoVrijeme;
+      }
+    }
+    const sek = Math.max(0, Math.floor(proteklo/1000));
+    ctx.fillStyle = (tema == "TAMNA") ? "#f7f2e8" : "#0e213f";
+    ctx.font = "12px Audiowide";
+    ctx.fillText("VRIJEME: " + sek + "s", 10, 60);
   
     if(!igraPocela || gameOver){
       ctx.fillStyle = "rgba(18, 41, 78, 0.35)";
@@ -231,10 +255,26 @@ function crtaj(){
       ctx.fillStyle = "#0E213F";
       ctx.font = "24px Audiowide";
       ctx.fillText(!igraPocela ? "START" : "RESTART", canvas.width/2, dugme.y + 36);
-      ctx.font = "16px Audiowide";
-      ctx.fillText(!igraPocela ? "Klikni START za početak igre" : "Klikni RESTART za novu igru", canvas.width/2, dugme.y + 85);
+      ctx.font = "20px Audiowide";
+      ctx.fillText(!igraPocela ? "Klikni START za početak igre" : "GAME OVER. Klikni RESTART za novu igru", canvas.width/2, dugme.y + 85);
       
+      if(gameOver){
+        const prezivljeno = Math.max(
+          0,
+          Math.floor((vrijemeKraja - vrijemePocetka - ukupnoPauziranoVrijeme) /1000)
+        );
+        ctx.fillStyle = "#edeff1";
+        ctx.font = "22px Audiowide";
+        ctx.textAlign = "center";
+        ctx.fillText(
+          "Preživjeli ste: " + prezivljeno + "s",
+          canvas.width / 2,
+          canvas.height / 2 + 90
+        );
+      }
+
       ctx.textAlign = "start";
+      proteklo = 0;
     }
     if(igraPocela && !gameOver){
       pauseDugme.x = canvas.width - pauseDugme.w -10;
@@ -272,17 +312,42 @@ canvas.addEventListener("click", function(e){
   const my = e.clientY - rect.top;
 
   if(igraPocela && !gameOver && klikNaPause(mx, my)){
-    pauzirano = !pauzirano;
+    if(!pauzirano){
+      pauzirano = true;
+      pocetakPauze = performance.now();
+    }else{
+      pauzirano = false;
+      ukupnoPauziranoVrijeme += performance.now() - pocetakPauze;
+      pocetakPauze = 0;
+    }
     return;
   }
   if(!klikNaDugme(mx, my)) return;
 
   if(!igraPocela){
+    const nickEl = document.getElementById("nickInput");
+    const bojaEl = document.getElementById("bojaInput");
+    const uputaEl = document.getElementById("uputa");
+
+    nickname = nickEl.value || "Igrac";
+    igrac.boja = bojaEl.value || igrac.boja;
+
+    vrijemePocetka = performance.now();
+    ukupnoPauziranoVrijeme = 0;
+    pocetakPauze = 0;
+
+    nickEl.style.display = "none";
+    bojaEl.style.display = "none";
+    uputaEl.style.display = "none";
+    
     igraPocela = true;
     restart();
     return;
   }
   if(gameOver){
+    vrijemePocetka = performance.now();
+    ukupnoPauziranoVrijeme = 0;
+    pocetakPauze = 0;
     restart();
   }
 
@@ -290,7 +355,9 @@ canvas.addEventListener("click", function(e){
 });
 function restart(){
   gameOver = false;
+  pauzirano = false;
   score = 0;
+  vrijemeKraja = 0;
   stitiTajmer = performance.now() + 600;
   igrac.x = canvas.width / 2;
   igrac.y = canvas.height / 2;
