@@ -40,8 +40,21 @@ canvas{
   border: 1px solid #bc8764;
   background-color: #f4bf98;
   color: #0E213F;
-  font-family: "Audiowide", 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-family: inherit;
   font-size: 14px;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+#nickInput, #bojaInput{
+  padding: 8px 10px;
+  margin: 6px;
+  width: 200px;
+
+  font-size: 14px;
+  font-family: inherit;
+
+  border: 1px solid #bc8764;
+  border-radius: 6px;
+
+  outline: none;
 }
